@@ -13,13 +13,15 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-class Ui_MainWindow(Object):
-    self.MainWindow
+class Ui_MainWindow():
+    def __init__(self, MainWindow):
+        super().__init__()
+        self.MainWindow = MainWindow 
 
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(650, 454)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+    def setupUi(self):
+        self.MainWindow.setObjectName("MainWindow")
+        self.MainWindow.resize(1000, 1000)
+        self.centralwidget = QtWidgets.QWidget(self.MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         
         self.lineEdit = QtWidgets.QLineEdit(self.centralwidget)
@@ -57,26 +59,27 @@ class Ui_MainWindow(Object):
         self.textBrowser.setGeometry(QtCore.QRect(260, 10, 256, 51))
         self.textBrowser.setObjectName("textBrowser")
         
-        # self.imageLbl = QtWidgets.QLabel(self.centralwidget)
-        # self.imageLbl.setGeometry(QtCore.QRect(180, 90, 451, 271))
-        # self.imageLbl.setText("")
-        # self.imageLbl.setObjectName("imageLbl")
+        self.imageLbl = QtWidgets.QLabel(self.centralwidget)
+        self.imageLbl.setGeometry(QtCore.QRect(180, 90, 500, 500))
+        self.imageLbl.setText("")
+        self.imageLbl.setObjectName("imageLbl")
         
-        MainWindow.setCentralWidget(self.centralwidget)
+        self.MainWindow.setCentralWidget(self.centralwidget)
         
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar = QtWidgets.QMenuBar(self.MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 650, 22))
         self.menubar.setObjectName("menubar")
-        MainWindow.setMenuBar(self.menubar)
+        self.MainWindow.setMenuBar(self.menubar)
 
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar = QtWidgets.QStatusBar(self.MainWindow)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+        self.MainWindow.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi(self.MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(self.MainWindow)
 
         self.pushButton.clicked.connect(self.show_chart_on_main_window)
+
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -98,69 +101,71 @@ class Ui_MainWindow(Object):
         - cam_ids: a list of str representing names of cameras
         - nums_vehicles: a list of int representing the numbers of vehicles that each camera counted in 1 hour.
         """
+        pixmap = QtGui.QPixmap('background_pyqt.png') # Setup pixmap with the provided image
+        pixmap = pixmap.scaled(self.imageLbl.width(), self.imageLbl.height(), QtCore.Qt.KeepAspectRatio) # Scale pixmap
+        self.imageLbl.setPixmap(pixmap) # Set the pixmap onto the label
+        self.imageLbl.setAlignment(QtCore.Qt.AlignCenter) # Align the label to center'
+
         start_time = self.lineEdit.text()
         # end_time = self.lineEdit_2.text()
         date = self.lineEdit_3.text()
 
         cam_ids, nums_vehicles = Controller().get_data(date, int(start_time))
         
-        # fileName = self.controller_obj.get_chart(value1, value2)
-        # if fileName != None:
-        #     pixmap = QtGui.QPixmap(fileName) # Setup pixmap with the provided image
-        #     pixmap = pixmap.scaled(self.imageLbl.width(), self.imageLbl.height(), QtCore.Qt.KeepAspectRatio) # Scale pixmap
-        #     self.imageLbl.setPixmap(pixmap) # Set the pixmap onto the label
-        #     self.imageLbl.setAlignment(QtCore.Qt.AlignCenter) # Align the label to center
-        # else:
-        #     print("There is no [{0}, {1}] in database.".format(value1, value2))
-        
         return cam_ids, nums_vehicles
 
     def show_chart_on_main_window(self):
-        canvas = Canvas(parent = self, width=8, height=4)
-        canvas.move(0,0)
+        cam_ids, nums_vehicles = self.enter()
+        if len(nums_vehicles) > 0:
+            y_pos = np.arange(len(cam_ids))
+            plt.bar(y_pos, nums_vehicles, align='center', alpha=0.5)
+            plt.xticks(y_pos, labels=cam_ids)
+            plt.ylabel('the number of vehicles')
+            plt.savefig('temp_fig.png', dpi=1000)
+            plt.close()
+            pixmap = QtGui.QPixmap('temp_fig.png') # Setup pixmap with the provided image
+            pixmap = pixmap.scaled(self.imageLbl.width(), self.imageLbl.height(), QtCore.Qt.KeepAspectRatio) # Scale pixmap
+            self.imageLbl.setPixmap(pixmap) # Set the pixmap onto the label
+            self.imageLbl.setAlignment(QtCore.Qt.AlignCenter) # Align the label to center'
+        else:
+            alert = QtWidgets.QMessageBox()
+            alert.setText('Data not found')
+            alert.exec_()
+     
+# class Canvas(FigureCanvas):
+#     def __init__(self, parent, labels, nums, width = 5, height = 5, dpi = 100):
+#         fig = Figure(figsize=(width, height), dpi=dpi)
+#         # self.axes = fig.add_subplot(111)
+#         self.labels = labels
+#         self.nums = nums
 
-class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self):
-        super().__init__()
-        title = "  "
-        top = 400
-        left = 400
-        width = 900
-        height = 500
+#         FigureCanvas.__init__(self, fig)
+#         self.setParent(parent)
+        
+#         self.plot()
+#         print("DONE")
 
-        self.setWindowTitle(title)
-        self.setGeometry(top, left, width, height)
-
-
-class Canvas(FigureCanvas):
-    def __init__(self, parent = None, width = 5, height = 5, dpi = 100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
-
-        FigureCanvas.__init__(self, fig)
-        self.setParent(parent)
-        cam_ids, nums_vehicles = parent.enter()
-        # print(cam_ids, nums_vehicles)
-        self.plot(nums_vehicles, cam_ids)
-        print("DONE")
-
-    def plot(self, nums, labels):
-        """
-        To plot bar chart
-        Args:
-        - labels: a list of strings representing names of  columns in bar chart
-        - nums: a list of int representing quatities w.r.t columns.
-        """
-        ax = self.figure.add_subplot(111)
-        y_pos = np.arange(len(labels))
-
-        ax.bar(y_pos, nums, align='center', alpha=0.5)
-        ax.set_xticks(y_pos)
-        ax.set_xticklabels(labels)
-        ax.set_ylabel('the number of vehicles')
+#     def plot(self):
+#         """
+#         To plot bar chart
+#         Args:
+#         - labels: a list of strings representing names of  columns in bar chart
+#         - nums: a list of int representing quatities w.r.t columns.
+#         """
+#         nums = self.nums
+#         labels = self.labels
+#         y_pos = np.arange(len(labels))
+#         plt.bar(y_pos, nums, align='center', alpha=0.5)
+#         plt.xticks(y_pos, labels=labels)
+#         plt.ylabel('the number of vehicles')
+#         plt.savefig('temp_fig.png')
+#         plt.close()
+        # ax.bar(y_pos, nums, align='center', alpha=0.5)
+        # ax.set_xticks(y_pos)
+        # ax.set_xticklabels(labels)
+        # ax.set_ylabel('the number of vehicles')
+        # self.figure.savefig('temp_fig.png')
         # plt.title('Programming language usage')
-
-
 
 class Controller:
     def __init__(self):
@@ -182,9 +187,8 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    app.exec_()
-    # sys.exit(app.exec_())
+    ui = Ui_MainWindow(MainWindow)
+    ui.setupUi()
+    ui.MainWindow.show()
+    sys.exit(app.exec_())
 

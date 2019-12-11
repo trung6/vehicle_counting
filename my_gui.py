@@ -45,11 +45,20 @@ class Canvas(FigureCanvas):
         self.plot()
 
 
-    def plot(self):
-        x = np.array([50, 30,40])
-        labels = ["Apples", "Bananas", "Melons"]
+    def plot(self, nums = [1,2,3,4], labels=[1,2,3,4]):
+        """
+        To plot bar chart
+        Args:
+        - labels: a list of strings representing names of  columns in bar chart
+        - nums: a list of int representing quatities w.r.t columns.
+        """
         ax = self.figure.add_subplot(111)
-        ax.pie(x, labels=labels)
+        y_pos = np.arange(len(labels))
+
+        ax.bar(y_pos, nums, align='center', alpha=0.5)
+        ax.set_xticks(y_pos)
+        ax.set_xticklabels(labels)
+        ax.set_ylabel('the number of vehicles')
 
 
 

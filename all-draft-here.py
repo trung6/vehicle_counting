@@ -1,67 +1,48 @@
-import numpy as np
-l = [1,2,3,4]
-# m = [1 2 3 4]
-l = np.array(l)
-# m = np.array(m)
-print(l.shape)
-# print(m.shape)
-m = np.array([[1,2,3,4], [1,2,3,4]])
-print(m.shape)
-c = np.dot(m, l)
-print(c.shape)
-print(m)
-# print(l)
-# print(c)
+import sys, random
+from PyQt5.QtWidgets import (QApplication, QMainWindow)
+# from PyQt5.PyQtChart import QChart, QChartView, QValueAxis, QBarCategoryAxis, QBarSet, QBarSeries
+import PyQtChart
+exit()
+from PyQt5.Qt import Qt
+from PyQt5.QtGui import QPainter
 
-m[:, [0, 1]] = m[:, [1, 0]]
-m[:, [2, 3]] = m[:, [3, 2]]
-print(m)
-l = np.array([5, 5])
-print(l.shape)
-# l = np.array([[5], [5]])
-# np.transpose(l)
-# np.reshape(l, (1, 2))
-# l = np.expand_dims(l, axis = 1)
-# print(l.shape)
+class MainWindow(QMainWindow):
+	def __init__(self):
+		super().__init__()
+		self.resize(800, 600)
 
-# m_l = np.append(m, l, axis = 1)
-# print(m_l)
-# from sort import Sort
-# s = Sort()
-x = np.array([1,2,3])
-print(np.diag(x).shape)
+		set0 = QBarSet('X0')
 
-x = np.array([1, 2, 3])
-result = np.where(x < 2)
-print(type(result))
-y = np.array([ [1,2,3], [4,5,6], [7,8,9] ])
-print(y)
-# y = np.delete(y, result, axis=0)
-# print(y)
-# x = np.delete(x, result, axis=0)
-# print(x)
-# dets = np.array([ [1,2,3], [4,5,6], [7,8,9] ])
-# scores = dets[:, 2]
-# order = scores.argsort()[::-1]
-# print(order)
-print(y[ np.array([0,2]) , :])
+		set0.append([random.randint(0, 10) for i in range(6)])
+		
+		series = QBarSeries()
+		series.append(set0)
+		
+		chart = QChart()
+		chart.addSeries(series)
+		chart.setTitle('Bar Chart Demo')
+		chart.setAnimationOptions(QChart.SeriesAnimations)
 
-labels = np.array([1, 2, 3])
-interest = np.array([3, 8])
-indices = list(np.where(np.in1d(labels, interest)))
-print(len(indices))
+		months = ('Jan')
 
-print(np.log(0.0001))
+		axisX = QBarCategoryAxis()
+		axisX.append(months)
 
-import pandas as pd
-df = pd.read_csv('traffic_measurement.csv', delimiter=',', encoding="utf-8-sig")
-# cam_id,date,start_time,end_time,num_vehicles
-interest_df = df.loc[lambda df: (df.date == '10/12/2019') & (df.start_time == 1), ['cam_id', 'num_vehicles']]
-print(interest_df['cam_id'].tolist(), interest_df['num_vehicles'].tolist())
-# print(d)
-class trial():
-    @staticmethod
-    def trial1():
-        print('je')
-# trial = trial()
-trial().trial1()
+		axisY = QValueAxis()
+		axisY.setRange(0, 15)
+
+		chart.addAxis(axisX, Qt.AlignBottom)
+		chart.addAxis(axisY, Qt.AlignLeft)
+
+		chart.legend().setVisible(True)
+		chart.legend().setAlignment(Qt.AlignBottom)
+
+		chartView = QChartView(chart)
+		self.setCentralWidget(chartView)
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+
+    window = MainWindow()
+    window.show()
+
+    sys.exit(app.exec_())
