@@ -1,0 +1,25 @@
+
+
+Sử dụng:
+Hệ thống đếm xe được tích hợp vào camera. Khi một xe ô tô lọt vào tầm nhìn của camera, hệ thống phát hiện ô tô đó (trong ảnh mà camera thu được), tăng biến đếm lên một đơn vị, gán 1 số định danh cho ô tô đó, theo vết của xe đó và hiển thi số định danh ứng với xe trong các frame tiếp theo cho đến khi nó ra khỏi tầm nhìn của camera.
+
+Biểu đồ phân rã chức năng:
+
+
+
+concrete	machine	steel	soil_sand
+6392	6207	799	499
+15.65	3.2	23.99	9.74
+93.42	93.53	87.22	61.37
+94.11	94.3	81.64	59.37
+95.03	93.35	88.27	51.82
+93.04	92.71	82.7	58.06
+94.67	94.92	88.92	66.55
+94.88	95.38	90.62	70.28
+94.32	95.28	76.06	71.69
+93.69	93.23	92.42	56.69
+93.22	93.72	78.52	65.56
+94.78	94.13	91.32	73.5
+94.55	93.78	90.42	72.35
+94.48	94.08	92.18	70.9
+94.49	93.86	90.21	72.46
