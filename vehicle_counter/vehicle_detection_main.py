@@ -21,117 +21,10 @@ from PIL import Image
 from utils import label_map_util
 from sort import Sort, iou
 
-#helper function
-def remove_box_with_score_thres(boxes, scores, score_thres):
-    """
-    Args:
-    - boxes: A 2-D float Tensor of shape [num_boxes, 4].
-    - scores: A 1-D float Tensor of shape [num_boxes] representing a single score corresponding to each box (each row of boxes).
-    - score_thres: A scalar float Tensor representing threshold to remove a box from input boxes.
-    
-    Returns:
-    - selected_boxes: A 2-D float Tensor of shape [num_boxes, 4] representing boxes after selection.
-    - indices: a int tuple representing indices to delete. 
-    """
-    indices = np.where(scores<score_thres)
-    return indices
-
-def nms(dets, scores, iou_threshold):
-    """
-    Args:
-    - dets: a 2-D float Tensor of shape [num_boxes, 4] representing predicted bounding boxes in form of [x1, y1, x2, y2]
-    - scores: a 1-D float Tensor of shape [num_boxes] representing confidence scores for bounding boxes.
-    - iou_threshold: a float scalar representing iou threshold to remove boxes that coincide.
-    Returns:
-    - keep: a int list representing indices of dets that are kept after nms.
-    """
-    x1 = dets[:, 0]
-    y1 = dets[:, 1]
-    x2 = dets[:, 2]
-    y2 = dets[:, 3]
-    # print(x1)
-    areas = (x2 - x1 + 1) * (y2 - y1 + 1)
-    order = scores.argsort()[::-1]#sort in decreasing
-
-    keep = []
-    while order.size > 0:
-        i = order[0]
-        keep.append(i)
-        xx1 = np.maximum(x1[i], x1[order[1:]])
-        yy1 = np.maximum(y1[i], y1[order[1:]])
-        xx2 = np.minimum(x2[i], x2[order[1:]])
-        yy2 = np.minimum(y2[i], y2[order[1:]])
-
-        w = np.maximum(0.0, xx2 - xx1 + 1)
-        h = np.maximum(0.0, yy2 - yy1 + 1)
-        inter = w * h
-        ovr = inter / (areas[i] + areas[order[1:]] - inter)
-
-        inds = np.where(ovr <= iou_threshold)[0]
-        order = order[inds + 1]
-
-    return keep
-
-def filter_classes(labels, interested_classes):
-    """
-    Args:
-    - labels: a 1-D int numpy array of shape (num_boxes) representing class_ids of predicted bounding boxes
-    - interested_classes: a 1-D int numpy array of shape (num_interest_classes) representing class_ids of interested_classes.
-    Returns
-    - indices: a list of int scalar of len (num_boxes) representing keeping indices of labels. 
-    """
-    return np.array(np.where(np.in1d(labels, interested_classes)))
-
-def load_image_into_numpy_array(image):
-    (im_width, im_height) = image.size
-    return np.array(image.getdata()).reshape((im_height, im_width,
-            3)).astype(np.uint8)
-
-# initialize .csv
-# print(os.path.isdir('/media/trung/01D4B61EC8BD72C0/Ki1_nam5/HHTQĐ/vehicle_counting_tensorflow-master/traffic_measurement.csv'))
-# if not os.path.isdir('/media/trung/01D4B61EC8BD72C0/Ki1_nam5/HHTQĐ/vehicle_counting_tensorflow-master/traffic_measurement.csv'):
-#     with open('traffic_measurement.csv', 'w') as f:
-#         writer = csv.writer(f)
-#         csv_line = \
-#             'Camera_id, Start time, End time, Num of vehicles'
-#         writer.writerows([csv_line.split(',')])
 
 # By default I use an "SSD with Mobilenet" model here. See the detection model zoo (https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md) for a list of other models that can be run out-of-the-box with varying speeds and accuracies.
 # What model to download.
-MODEL_NAME = 'ssd_mobilenet_v1_coco_2018_01_28'
-MODEL_FILE = MODEL_NAME + '.tar.gz'
-DOWNLOAD_BASE = \
-    'http://download.tensorflow.org/models/object_detection/'
 
-# Path to frozen detection graph. This is the actual model that is used for the object detection.
-PATH_TO_CKPT = MODEL_NAME + '/frozen_inference_graph.pb'
-
-# List of the strings that is used to add correct label for each box.
-PATH_TO_LABELS = os.path.join('data', 'mscoco_label_map.pbtxt')
-
-NUM_CLASSES = 90
-
-# Download Model
-# uncomment if you have not download the model yet
-
-# Load a (frozen) Tensorflow model into memory.
-detection_graph = tf.Graph()
-with detection_graph.as_default():
-    od_graph_def = tf.GraphDef()
-    with tf.gfile.GFile(PATH_TO_CKPT, 'rb') as fid:
-        serialized_graph = fid.read()
-        od_graph_def.ParseFromString(serialized_graph)
-        tf.import_graph_def(od_graph_def, name='')
-
-# Loading label map
-# Label maps map indices to category names, 
-# so that when our convolution network predicts 5, we know that this corresponds to airplane.
-# Here I use internal utility functions, 
-# but anything that returns a dictionary mapping integers to appropriate string labels would be fine
-label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
-categories = label_map_util.convert_label_map_to_categories(label_map,
-        max_num_classes=NUM_CLASSES, use_display_name=True)
-category_index = label_map_util.create_category_index(categories)
 
 def detector(image):
     """
@@ -139,7 +32,8 @@ def detector(image):
     - image: a 3-d int Tensor of shape [img_h, img_w, 3]
 
     Returns:
-    - boxes: a 3d float Tensor of shape [1, num_boxes, 4] representing predicted bounding boxes relative with image size and in form of [y1, x1, y2, x2]
+    - boxes: a 3d float Tensor of shape [1, num_boxes, 4] \
+        representing predicted bounding boxes relative with image size and in form of [y1, x1, y2, x2]
     - scores: a 2d float Tensor of shape [1, num_boxes] representing scores for predicted bounding boxes which are float reals between 0 and 1.
     - classes: a 2d float Tensor of shape [1, num_boxes] representing class ids of objects in boxes.
     - num: a scalar representing the number of predicted bounding boxes.
@@ -352,16 +246,7 @@ def object_detection_function():
                 cv2.imshow('image',input_frame)
                 cv2.waitKey(1)
             #end while
-            with open('traffic_measurement.csv', 'a') as f:
-                writer_csv = csv.writer(f)
-                
-                today = date.today().strftime('%d/%m/%Y')
-                start_time = int(datetime.now().strftime('%H'))
-                end_time = start_time + 1
-
-                csv_line = '{},{},{},{},{}'.format(cam_name, today,start_time, end_time, total_passed_vehicle)
-                writer_csv.writerows([csv_line.split(',')])
-
+    
             cap.release()
             cv2.destroyAllWindows()
         summary_writer.close()
