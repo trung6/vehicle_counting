@@ -7,8 +7,8 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
+# from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+# from matplotlib.figure import Figure
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -60,7 +60,7 @@ class Ui_MainWindow():
         self.textBrowser.setObjectName("textBrowser")
         
         self.imageLbl = QtWidgets.QLabel(self.centralwidget)
-        self.imageLbl.setGeometry(QtCore.QRect(180, 90, 500, 500))
+        self.imageLbl.setGeometry(QtCore.QRect(240, 90, 700, 700))
         self.imageLbl.setText("")
         self.imageLbl.setObjectName("imageLbl")
         
@@ -131,42 +131,7 @@ class Ui_MainWindow():
             alert = QtWidgets.QMessageBox()
             alert.setText('Data not found')
             alert.exec_()
-     
-# class Canvas(FigureCanvas):
-#     def __init__(self, parent, labels, nums, width = 5, height = 5, dpi = 100):
-#         fig = Figure(figsize=(width, height), dpi=dpi)
-#         # self.axes = fig.add_subplot(111)
-#         self.labels = labels
-#         self.nums = nums
-
-#         FigureCanvas.__init__(self, fig)
-#         self.setParent(parent)
-        
-#         self.plot()
-#         print("DONE")
-
-#     def plot(self):
-#         """
-#         To plot bar chart
-#         Args:
-#         - labels: a list of strings representing names of  columns in bar chart
-#         - nums: a list of int representing quatities w.r.t columns.
-#         """
-#         nums = self.nums
-#         labels = self.labels
-#         y_pos = np.arange(len(labels))
-#         plt.bar(y_pos, nums, align='center', alpha=0.5)
-#         plt.xticks(y_pos, labels=labels)
-#         plt.ylabel('the number of vehicles')
-#         plt.savefig('temp_fig.png')
-#         plt.close()
-        # ax.bar(y_pos, nums, align='center', alpha=0.5)
-        # ax.set_xticks(y_pos)
-        # ax.set_xticklabels(labels)
-        # ax.set_ylabel('the number of vehicles')
-        # self.figure.savefig('temp_fig.png')
-        # plt.title('Programming language usage')
-
+ 
 class Controller:
     def __init__(self):
         super(Controller, self).__init__()
